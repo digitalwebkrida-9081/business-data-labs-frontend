@@ -26,8 +26,8 @@ export async function generateMetadata(
   }
  
   return {
-    title: 'Location Data Reports & Store Location Intelligence | Business Data Labs Labs',
-    description: 'Get detailed location reports including store details, contact information, pickup options, and amenities. Use accurate location intelligence to improve retail research and market analysis.',
+    title: 'Accurate Data Reports on Available Stores in Different Locations',
+    description: 'See the latest reports of available store locations in different regions. Businessdatalabs has an accurate report of data on number of store locations.',
   };
 }
 

@@ -8,8 +8,8 @@ import DataDelivery from "@/components/DataDelivery";
 import WhyChoose from "@/components/WhyChoose";
 
 export const metadata: Metadata = {
-  title: "Web Scraping & Data Extraction Services | Business Data Labs",
-  description: "Business Data Labs provides professional web scraping and data extraction services. Convert website data into Excel, CSV, or JSON formats for research, business intelligence, and automation.",
+  title: "AI-Powered Web and Data Scraping Services",
+  description: "AI-powered web scraping solution to scrape data from any website and transfer it into Excel, CSV, JSON, and many others. Get reliable web scraping services that drive your business forward.",
 };
 
 export default function Home() {

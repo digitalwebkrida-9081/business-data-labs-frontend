@@ -26,7 +26,7 @@ export async function generateMetadata(
 
   if (!slug) {
     return {
-      title: 'Dataset Detail | Data Scraper Hub',
+      title: 'Dataset Detail | Business Data Labs',
       description: 'View detailed business data and lead lists.'
     };
   }
@@ -45,7 +45,7 @@ export async function generateMetadata(
   } else {
       // Fallback if the URL structure isn't exactly matching
       return {
-          title: 'Business Data Report | Data Scraper Hub',
+          title: 'Business Data Report | Business Data Labs',
           description: 'View detailed business data and lead lists.'
       };
   }
@@ -53,8 +53,8 @@ export async function generateMetadata(
   const titleCategory = toTitleCase(categoryStr.replace(/-/g, ' '));
   const titleLocation = toTitleCase(countryStr.replace(/-/g, ' '));
   
-  const infoTitle = `Buy ${titleCategory} B2B Leads - ${titleLocation} Business Data | Business Data Labs`;
-  const infoDesc = `Download updated ${titleCategory} B2B leads data in ${titleLocation} with verified emails, direct phone numbers, company details, and geo-targeted data for high-converting outreach.`;
+  const infoTitle = `List of ${titleCategory} in ${titleLocation}`;
+  const infoDesc = `Download the list of ${titleCategory} in ${titleLocation}. Businessdatalabs provides an accurate directory and the latest data on the number of ${titleCategory} in ${titleLocation}.`;
 
   return {
     title: infoTitle,

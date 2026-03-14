@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Service from "@/components/service/Service";
 
 export const metadata: Metadata = {
-  title: "Web Scraping Services & Data Extraction Solutions | Business Data Labs",
-  description: "Explore Business Data Labs's web scraping services for e-commerce, real estate, finance, recruitment, and lead generation. Get accurate, structured data in CSV, Excel, or JSON formats.",
+  title: "Businessdatalabs - Enterprise Graded Web Scraping Services",
+  description: "Businessdatalabs has complete service suite for web scraping. Get Clean and Comprehensive Data within 48 hours. Contact us to scale up your data handling ability.",
 };
 
 export default function ServicePage() {
