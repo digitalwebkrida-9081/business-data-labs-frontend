@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = 3600;
 
-const baseUrl = 'https://datasellerhub.com';
+const baseUrl = 'https://businessdatalabs.com';
 
 export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

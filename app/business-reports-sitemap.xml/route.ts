@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = 3600;
 
-const baseUrl = 'https://datasellerhub.com';
+const baseUrl = 'https://businessdatalabs.com';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
 
 function escapeXml(unsafe: string): string {

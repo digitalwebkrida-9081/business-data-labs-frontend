@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = 3600;
 
-const baseUrl = 'https://datasellerhub.com';
+const baseUrl = 'https://businessdatalabs.com';
 
 function escapeXml(unsafe: string): string {
   return unsafe.replace(/[<>&'"]/g, (c) => {
