@@ -1,0 +1,48 @@
+
+> data-scraper-frontend@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.8 (Turbopack)
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 16.3s
+   Running TypeScript ...
+   Collecting page data using 3 workers ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 3 workers (0/20) ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 3 workers (5/20) 
+   Generating static pages using 3 workers (10/20) 
+   Generating static pages using 3 workers (15/20) 
+ ✓ Generating static pages using 3 workers (20/20) in 2.1s
+   Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /b2b
+├ ○ /business-report-view
+├ ○ /contact
+├ ○ /dataset-detail
+├ ○ /faq
+├ ○ /gdpr
+├ ○ /google-maps-scraper
+├ ○ /location-report
+├ ○ /privacy-policy
+├ ○ /service
+├ ○ /service/ecom-scraping
+├ ○ /service/news-monitoring-data-scraping
+├ ○ /service/real-estate-data-scraping
+├ ○ /service/recruitment-scraping
+├ ○ /service/research-data-scraping
+├ ○ /service/retail-data-scraping
+└ ○ /service/sales-leads-data
+
+
+○  (Static)  prerendered as static content
+

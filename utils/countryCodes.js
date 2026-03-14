@@ -1,0 +1,22 @@
+export const countryCodes = [
+  { code: '+1', flag: '🇺🇸', name: 'United States', label: 'US' },
+  { code: '+1', flag: '🇨🇦', name: 'Canada', label: 'CA' },
+  { code: '+44', flag: '🇬🇧', name: 'United Kingdom', label: 'UK' },
+  { code: '+61', flag: '🇦🇺', name: 'Australia', label: 'AU' },
+  { code: '+91', flag: '🇮🇳', name: 'India', label: 'IN' },
+  { code: '+971', flag: '🇦🇪', name: 'UAE', label: 'AE' },
+  { code: '+49', flag: '🇩🇪', name: 'Germany', label: 'DE' },
+  { code: '+33', flag: '🇫🇷', name: 'France', label: 'FR' },
+  { code: '+81', flag: '🇯🇵', name: 'Japan', label: 'JP' },
+  { code: '+65', flag: '🇸🇬', name: 'Singapore', label: 'SG' },
+  { code: '+86', flag: '🇨🇳', name: 'China', label: 'CN' },
+  { code: '+55', flag: '🇧🇷', name: 'Brazil', label: 'BR' },
+  { code: '+27', flag: '🇿🇦', name: 'South Africa', label: 'ZA' },
+  { code: '+7', flag: '🇷🇺', name: 'Russia', label: 'RU' },
+  { code: '+39', flag: '🇮🇹', name: 'Italy', label: 'IT' },
+  { code: '+34', flag: '🇪🇸', name: 'Spain', label: 'ES' },
+  { code: '+52', flag: '🇲🇽', name: 'Mexico', label: 'MX' },
+  { code: '+31', flag: '🇳🇱', name: 'Netherlands', label: 'NL' },
+  { code: '+41', flag: '🇨🇭', name: 'Switzerland', label: 'CH' },
+  { code: '+46', flag: '🇸🇪', name: 'Sweden', label: 'SE' }
+];

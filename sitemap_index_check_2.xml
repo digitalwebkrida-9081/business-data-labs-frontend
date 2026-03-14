@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://datascraperhub.com/page-sitemap.xml</loc>
+    <lastmod>2026-02-13T06:56:34.859Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://datascraperhub.com/country-sitemap.xml</loc>
+    <lastmod>2026-02-13T06:56:34.859Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://datascraperhub.com/dataset-sitemap.xml</loc>
+    <lastmod>2026-02-13T06:56:34.859Z</lastmod>
+  </sitemap>
+</sitemapindex>
