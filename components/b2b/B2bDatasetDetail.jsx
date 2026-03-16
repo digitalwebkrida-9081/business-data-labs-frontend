@@ -956,8 +956,8 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                 {/* <div className="w-8 h-8 bg-gradient-to-tr from-orange-400 to-purple-600 rounded-full flex items-center justify-center">
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
                                 </div> */}
-                                <img src="/images/logo.jpg" alt="logo" className='w-10 ' />
-                                Data Seller Hub
+                                <img src="/images/logo.png" alt="logo" className='w-10 ' />
+                                Business Data Labs
                             </div>
                         </div>
 
@@ -1129,8 +1129,8 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                         {/* Logo */}
                         <div className="flex justify-center mb-6">
                             <div className="flex items-center gap-2 text-slate-900 font-bold text-2xl">
-                                <img src="/images/logo.jpg" alt="logo" className='w-10 ' />
-                                Data Seller Hub
+                                <img src="/images/logo.png" alt="logo" className='w-10 ' />
+                                Business Data Labs
                             </div>
                         </div>
 
