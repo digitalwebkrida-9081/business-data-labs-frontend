@@ -83,7 +83,7 @@ const countryNameToCode = (name) => {
     return map[lower] || name;
 };
 
-const B2bDatasetDetail = ({ id, country, category }) => {
+const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
     const searchParams = useSearchParams();
     const displayLabel = searchParams.get('label');
     const filterState = searchParams.get('state') || '';
@@ -91,8 +91,8 @@ const B2bDatasetDetail = ({ id, country, category }) => {
     // Resolve country to code for API calls (e.g. "United States" -> "US")
     const countryApiCode = countryNameToCode(country);
 
-    const [dataset, setDataset] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [dataset, setDataset] = useState(initialDataset);
+    const [loading, setLoading] = useState(!initialDataset);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [purchaseLoading, setPurchaseLoading] = useState(false);
     const [form, setForm] = useState({
@@ -146,55 +146,67 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                          location: dataset.location
                     }
                 })
+            }).catch(error => {
+                console.error("Error submitting sample request API:", error);
+                // We can continue generating the file even if tracking fails.
             });
+            
+            setTimeout(() => {
+                try {
+                    // Generate Excel File
+                    const wb = XLSX.utils.book_new();
+                    
+                    // Create data for Excel with masked/hidden fields
+                    const exportData = dataset.sampleList.map(item => ({
+                        "Business Name": item.name,
+                        "Address": item.address || "Available in Full List",
+                        "City": item.city,
+                        "State": item.state,
+                        "Country": item.country,
+                        "Phone": "Available in Full List (Verified)", // Masked
+                        "Email": "Available in Full List (Verified)", // Masked
+                        "Website": item.website ? "Available" : "--",
+                        "Rating": item.rating,
+                        "Reviews": item.reviews
+                    }));
+
+                    const ws = XLSX.utils.json_to_sheet(exportData);
+                    
+                    // Adjust column widths
+                    const wscols = [
+                        {wch: 30}, // Name
+                        {wch: 30}, // Address
+                        {wch: 15}, // City
+                        {wch: 15}, // State
+                        {wch: 15}, // Country
+                        {wch: 25}, // Phone
+                        {wch: 25}, // Email
+                        {wch: 20}, // Website
+                        {wch: 10}, // Rating
+                        {wch: 10}  // Reviews
+                    ];
+                    ws['!cols'] = wscols;
+
+                    XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
+                    
+                    // Download file
+                    XLSX.writeFile(wb, `${dataset.category}-${dataset.location}-SAMPLE.xlsx`);
+                    
+                    setPurchaseLoading(false);
+                    setIsSampleModalOpen(false);
+                    alert("Sample data downloaded successfully!");
+                } catch (error) {
+                    console.error("Error generating sample file:", error);
+                    setPurchaseLoading(false);
+                    alert("Failed to create sample file.");
+                }
+            }, 1500);
+
         } catch (error) {
-            console.error("Error submitting sample request:", error);
-        }
-        
-        setTimeout(() => {
-            // Generate Excel File
-            const wb = XLSX.utils.book_new();
-            
-            // Create data for Excel with masked/hidden fields
-            const exportData = dataset.sampleList.map(item => ({
-                "Business Name": item.name,
-                "Address": item.address || "Available in Full List",
-                "City": item.city,
-                "State": item.state,
-                "Country": item.country,
-                "Phone": "Available in Full List (Verified)", // Masked
-                "Email": "Available in Full List (Verified)", // Masked
-                "Website": item.website ? "Available" : "--",
-                "Rating": item.rating,
-                "Reviews": item.reviews
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            
-            // Adjust column widths
-            const wscols = [
-                {wch: 30}, // Name
-                {wch: 30}, // Address
-                {wch: 15}, // City
-                {wch: 15}, // State
-                {wch: 15}, // Country
-                {wch: 25}, // Phone
-                {wch: 25}, // Email
-                {wch: 20}, // Website
-                {wch: 10}, // Rating
-                {wch: 10}  // Reviews
-            ];
-            ws['!cols'] = wscols;
-
-            XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
-            
-            // Download file
-            XLSX.writeFile(wb, `${dataset.category}-${dataset.location}-SAMPLE.xlsx`);
-            
+            console.error("Error preparing sample request:", error);
             setPurchaseLoading(false);
-            setIsSampleModalOpen(false);
-            alert("Sample data downloaded successfully!");
-        }, 1500);
+            alert("Failed to prepare sample download.");
+        }
     };
 
     const processDownloadAfterPayment = async () => {
@@ -332,7 +344,15 @@ const B2bDatasetDetail = ({ id, country, category }) => {
     };
 
     useEffect(() => {
+        // If we already have the initial dataset from SSR and no filters are applied, don't refetch
+        if (initialDataset && !filterState && !filterCity) {
+            setDataset(initialDataset);
+            setLoading(false);
+            return;
+        }
+
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -472,7 +492,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
         };
 
         fetchData();
-    }, [id, country, category, filterState, filterCity]);
+    }, [id, country, category, filterState, filterCity, initialDataset]);
 
     // Track if sample modal has been opened manually or automatically
     useEffect(() => {
@@ -732,7 +752,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
             <div className="py-20 pb-0 bg-white">
                 <div className="container mx-auto px-4">
                     <div className="mb-12 text-left">
-                        <h2 className="text-2xl lg:text-2xl font-bold text-slate-900 mb-4">How Business Data Labs Data Services Helps Businesses</h2>
+                        <h2 className="text-2xl lg:text-2xl font-bold text-slate-900 mb-4">How DataSellerHub Data Services Helps Businesses</h2>
                         <p className="text-slate-600 text-base md:text-lg leading-relaxed max-w-4xl">Explore the strategic advantages of our data scraping solutions for your business.</p>
                     </div>
                     
@@ -748,12 +768,12 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                         </div>
                         
                         <div>
-                            <h4 className="text-lg lg:text-xl font-bold text-slate-900 mb-3">Why Business Data Labs is Your Trusted Source for {dataset.category} Data</h4>
-                            <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4">When it comes to sourcing a list of {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()}, data accuracy is paramount. Business Data Labs stands out as the industry leader for several reasons:</p>
+                            <h4 className="text-lg lg:text-xl font-bold text-slate-900 mb-3">Why DataSellerHub is Your Trusted Source for {dataset.category} Data</h4>
+                            <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4">When it comes to sourcing a list of {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()}, data accuracy is paramount. DataSellerHub stands out as the industry leader for several reasons:</p>
                             <ul className="list-disc pl-6 space-y-2 text-slate-600 text-sm md:text-base leading-relaxed">
-                                <li><strong>Verified Authenticity:</strong> Unlike automated scrapers, Business Data Labs ensures that every entry for {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} is verified for accuracy, reducing bounce rates in your outreach.</li>
+                                <li><strong>Verified Authenticity:</strong> Unlike automated scrapers, DataSellerHub ensures that every entry for {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} is verified for accuracy, reducing bounce rates in your outreach.</li>
                                 <li><strong>Deep Market Insight:</strong> We don&apos;t just provide names; our {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} report offers deep insights into the operational scale of these {dataset.category}.</li>
-                                <li><strong>Frequent Updates:</strong> The {dataset.category} sector in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} changes fast. Business Data Labs refreshes its database regularly to reflect new company formations and contact changes.</li>
+                                <li><strong>Frequent Updates:</strong> The {dataset.category} sector in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} changes fast. DataSellerHub refreshes its database regularly to reflect new company formations and contact changes.</li>
                                 <li><strong>Compliance Guaranteed:</strong> Our data collection for {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} follows all local data protection regulations, ensuring your marketing remains ethical and legal.</li>
                             </ul>
                         </div>
@@ -771,7 +791,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                         <div>
                             <h4 className="text-lg lg:text-xl font-bold text-slate-900 mb-3">Maximize Your ROI in the {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} Market</h4>
                             <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4">Investing in a high-quality list of {dataset.category} is an investment in your company&apos;s growth. Whether you are selling software to {dataset.category} or looking to outsource your production to {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()}, our data provides the foundation for success.</p>
-                            <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-6">Stop wasting time with outdated spreadsheets. Trust Business Data Labs to provide the most authentic, up-to-date, and actionable list of {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} available on the market today.</p>
+                            <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-6">Stop wasting time with outdated spreadsheets. Trust DataSellerHub to provide the most authentic, up-to-date, and actionable list of {dataset.category} in {displayLabel || dataset.location.split(',').slice(-2).join(',').trim()} available on the market today.</p>
                             <div><button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm md:text-base font-bold transition uppercase tracking-wide cursor-pointer shadow-lg shadow-blue-500/20 inline-flex items-center gap-2">Get Instant Access to the {dataset.category} Report</button></div>
                         </div>
                     </div>
@@ -936,8 +956,8 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                                 {/* <div className="w-8 h-8 bg-gradient-to-tr from-orange-400 to-purple-600 rounded-full flex items-center justify-center">
                                     <div className="w-4 h-4 bg-white rounded-full"></div>
                                 </div> */}
-                                <img src="/images/logo.png" alt="logo" className='w-10 ' />
-                                Business Data Labs
+                                <img src="/images/logo.jpg" alt="logo" className='w-10 ' />
+                                Data Seller Hub
                             </div>
                         </div>
 
@@ -1052,7 +1072,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                                                 }
                                             }}
                                             onApprove={async (data, actions) => {
-                                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.Business Data Labs.com';
+                                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
                                                 try {
                                                     const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, {
                                                         method: "POST",
@@ -1109,8 +1129,8 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                         {/* Logo */}
                         <div className="flex justify-center mb-6">
                             <div className="flex items-center gap-2 text-slate-900 font-bold text-2xl">
-                                <img src="/images/logo.png" alt="logo" className='w-10 ' />
-                                Business Data Labs
+                                <img src="/images/logo.jpg" alt="logo" className='w-10 ' />
+                                Data Seller Hub
                             </div>
                         </div>
 
@@ -1176,7 +1196,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                                     </div>
                                     DOWNLOAD SAMPLE
                                     </>
-                                )}
+                                )} 
                             </button>
                         </form>
                     </div>
