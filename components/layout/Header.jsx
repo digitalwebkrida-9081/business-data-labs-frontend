@@ -22,8 +22,8 @@ export default function Navbar() {
   const navLinks = [
     { name: "Services", href: "/service" },
     { name: "B2B Database", href: "/b2b-database" },
-    { name: "Location Reports", href: "/location-report" },
-    { name: "Blog", href: "/blog" },
+    // { name: "Location Reports", href: "/location-report" },
+    // { name: "Blog", href: "/blog" },
     { name: "Contact Us", href: "/contact" },
   ];
 

@@ -1025,7 +1025,7 @@ const B2bDatasetDetail = ({ id, country, category }) => {
                                         <PayPalButtons 
                                             style={{ layout: "vertical", color: "blue", shape: "rect", label: "paypal" }}
                                             createOrder={async (data, actions) => {
-                                               const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.Business Data Labs.com';
+                                               const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
                                                 let finalPrice = dataset.price || "199.00";
                                                 try { finalPrice = parseFloat(dataset.price).toFixed(2); } catch(e){}
 

@@ -62,9 +62,9 @@ export default function Footer() {
             <li className="hover:text-white cursor-pointer">
               <Link href="/faq">FAQs</Link>
             </li>
-            <li className="hover:text-white cursor-pointer">
+            {/* <li className="hover:text-white cursor-pointer">
               <Link href="/blog">Blog</Link>
-            </li>
+            </li> */}
             <li className="hover:text-white cursor-pointer">
               <Link href="/contact">Contact Us</Link>
             </li>
@@ -74,9 +74,9 @@ export default function Footer() {
             <li className="hover:text-white cursor-pointer">
               <Link href="/privacy-policy">Privacy Policy</Link>
             </li>
-            <li className="hover:text-white cursor-pointer">
+            {/* <li className="hover:text-white cursor-pointer">
               <Link href="/location-report">Location Based Data</Link>
-            </li>
+            </li> */}
             <li className="hover:text-white cursor-pointer">
               <Link href="/b2b">B2B Database</Link>
             </li>
