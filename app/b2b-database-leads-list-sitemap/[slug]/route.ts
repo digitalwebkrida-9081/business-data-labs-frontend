@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const revalidate = 3600;
 
-const baseUrl = 'https://businessdatalabs.com';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
 
 function escapeXml(unsafe: string): string {
@@ -26,6 +26,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const host = request.headers.get('host');
+  const scheme = request.headers.get('x-forwarded-proto') || 'https';
+  const baseUrl = host ? `${scheme}://${host}` : 'https://businessdatalabs.com';
   const { slug } = await params;
 
   // Expected format: leads-list-[country-slug].xml
