@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     { path: '/gdpr', priority: '0.3', changefreq: 'yearly' },
     { path: '/faq', priority: '0.6', changefreq: 'monthly' },
     { path: '/service/ecom-scraping', priority: '0.7', changefreq: 'monthly' },
-    { path: '/service/news-monitoring-data-scraping', priority: '0.7', changefreq: 'monthly' },
+    { path: '/service/news-monitoring-data-scraping', priority: '0.7', changefreq: 'monthly' },  
     { path: '/service/real-estate-data-scraping', priority: '0.7', changefreq: 'monthly' },
     { path: '/service/recruitment-scraping', priority: '0.7', changefreq: 'monthly' },
     { path: '/service/research-data-scraping', priority: '0.7', changefreq: 'monthly' },
