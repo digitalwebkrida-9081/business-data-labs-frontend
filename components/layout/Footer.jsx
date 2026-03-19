@@ -78,8 +78,8 @@ export default function Footer() {
               <Link href="/location-report">Location Based Data</Link>
             </li> */}
             <li className="hover:text-white cursor-pointer">
-              <Link href="/b2b">B2B Database</Link>
-            </li>
+              <Link href="/b2b-database">B2B Database</Link>
+            </li> 
           </ul>
         </div>
 
