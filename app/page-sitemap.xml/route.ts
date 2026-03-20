@@ -26,7 +26,6 @@ export async function GET(request: Request) {
     { path: '/b2b-database', priority: '0.9', changefreq: 'daily' },
     { path: '/blog', priority: '0.8', changefreq: 'daily' },
     { path: '/location-report', priority: '0.8', changefreq: 'weekly' },
-    { path: '/google-maps-scraper', priority: '0.8', changefreq: 'weekly' },
     { path: '/contact', priority: '0.7', changefreq: 'monthly' },
     { path: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
     { path: '/gdpr', priority: '0.3', changefreq: 'yearly' },

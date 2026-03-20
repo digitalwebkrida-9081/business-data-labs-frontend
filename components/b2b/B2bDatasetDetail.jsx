@@ -9,9 +9,7 @@ import WhyChoose from '../WhyChoose';
 import DatasetFaq from './DatasetFaq';
 // import * as XLSX from 'xlsx'; // Moved to dynamic import
 import dynamic from 'next/dynamic';
-import PayPalProvider from '../PayPalProvider';
 import { getCountryData, generateSimulatedDistribution } from '../../data/countryStates';
-import { PayPalButtons } from "@paypal/react-paypal-js";
 import { countryCodes } from '../../utils/countryCodes';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import PhoneInputField from '../ui/PhoneInputField';
@@ -119,6 +117,45 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
     const handleSampleChange = (e) => {
         const { name, value } = e.target;
         setSampleForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleStripeCheckout = async (e) => {
+        e.preventDefault();
+        setPurchaseLoading(true);
+        setIsFormComplete(true);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+        let finalPrice = dataset.price || 199;
+        
+        try {
+            const response = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: dataset.id,
+                    email: form.email,
+                    fullName: form.fullName,
+                    phoneNumber: form.phoneNumber,
+                    datasetName: `List of ${dataset.category} in ${dataset.location}`,
+                    price: finalPrice,
+                    successUrl: `${window.location.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}&dataset_id=${dataset.id}`,
+                    cancelUrl: window.location.href
+                }),
+            });
+            const data = await response.json();
+            if (data.success && data.url) {
+                window.location.href = data.url; // Redirect to Stripe
+            } else {
+                console.error("Stripe Error:", data);
+                alert("Could not initiate Stripe checkout. Please try again.");
+                setPurchaseLoading(false);
+                setIsFormComplete(false);
+            }
+        } catch (error) {
+            console.error("Stripe Error:", error);
+            alert("Payment gateway connection error.");
+            setPurchaseLoading(false);
+            setIsFormComplete(false);
+        }
     };
 
     const handleSampleDownload = async (e) => {
@@ -522,7 +559,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
     }
 
     return (
-        <PayPalProvider>
+      
             <div className="bg-white min-h-screen font-sans text-slate-800">
             {/* --- HERO SECTION --- */}
             <div className="bg-[#05051a] text-white pt-15 pb-20 relative overflow-hidden font-sans">
@@ -971,7 +1008,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
 
                         {/* Form */}
                         {!isFormComplete ? (
-                            <form onSubmit={(e) => { e.preventDefault(); setIsFormComplete(true); }} className="space-y-4">
+                            <form onSubmit={handleStripeCheckout} className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">
                                         Full Name <span className="text-red-500">*</span>
@@ -1022,92 +1059,11 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                             </form>
                         ) : (
                             <div className="space-y-6">
-                                <div className="bg-slate-50 p-4 rounded-xl text-sm border border-slate-200 relative">
-                                    <button 
-                                        onClick={() => setIsFormComplete(false)}
-                                        className="absolute top-4 right-4 text-blue-600 text-xs font-bold hover:underline cursor-pointer"
-                                    >
-                                        Edit Details
-                                    </button>
-                                    <p className="mb-1"><span className="font-bold text-slate-700">Name:</span> {form.fullName}</p>
-                                    <p className="mb-1"><span className="font-bold text-slate-700">Email:</span> {form.email}</p>
-                                    <p className="mb-0"><span className="font-bold text-slate-700">Phone:</span> {form.phoneNumber}</p>
+                                <div className="text-center py-8">
+                                    <div className="inline-block animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
+                                    <p className="text-slate-600 font-bold">Redirecting to Secure Checkout...</p>
+                                    <p className="text-sm text-slate-500">Please wait while we transfer you to Stripe.</p>
                                 </div>
-
-                                {purchaseLoading ? (
-                                    <div className="text-center py-8">
-                                        <div className="inline-block animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mb-4"></div>
-                                        <p className="text-slate-600 font-bold">Processing your data...</p>
-                                        <p className="text-sm text-slate-500">Please do not close this window.</p>
-                                    </div>
-                                ) : (
-                                    <div className="relative z-0">
-                                        <PayPalButtons 
-                                            style={{ layout: "vertical", color: "blue", shape: "rect", label: "paypal" }}
-                                            createOrder={async (data, actions) => {
-                                               const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
-                                                let finalPrice = dataset.price || "199.00";
-                                                try { finalPrice = parseFloat(dataset.price).toFixed(2); } catch(e){}
-
-                                                const response = await fetch(`${API_URL}/api/payment/create-paypal-order`, {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    body: JSON.stringify({
-                                                        datasetDetails: {
-                                                            category: dataset.category,
-                                                            location: dataset.location
-                                                        },
-                                                        price: finalPrice
-                                                    }),
-                                                });
-                                                
-                                                const orderData = await response.json();
-                                                
-                                                if (orderData.data?.id) {
-                                                    return orderData.data.id;
-                                                } else if (orderData.id) {
-                                                    return orderData.id;
-                                                } else {
-                                                    throw new Error("Could not initiate PayPal order.");
-                                                }
-                                            }}
-                                            onApprove={async (data, actions) => {
-                                                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stagservice.datasellerhub.com';
-                                                try {
-                                                    const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, {
-                                                        method: "POST",
-                                                        headers: { "Content-Type": "application/json" },
-                                                        body: JSON.stringify({
-                                                            orderID: data.orderID,
-                                                            name: form.fullName,
-                                                            email: form.email,
-                                                            phone: form.phoneNumber,
-                                                            datasetDetails: {
-                                                                category: dataset.category,
-                                                                location: dataset.location,
-                                                                country: country,
-                                                            }
-                                                        })
-                                                    });
-
-                                                    const orderData = await response.json();
-                                                    if (orderData.success) {
-                                                        await processDownloadAfterPayment();
-                                                    } else {
-                                                        alert("Payment capture failed. Please try again or contact support.");
-                                                    }
-                                                } catch (err) {
-                                                    console.error(err);
-                                                    alert("An error occurred during payment capture.");
-                                                }
-                                            }}
-                                            onError={(err) => {
-                                                console.error("PayPal UI Error:", err);
-                                                alert("An error occurred loading the payment gateway.");
-                                            }}
-                                        />
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
@@ -1203,7 +1159,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                 </div>
             )}
             </div>
-        </PayPalProvider>
+        
     );
 };
 
