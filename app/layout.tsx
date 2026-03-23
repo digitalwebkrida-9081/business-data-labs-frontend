@@ -47,7 +47,7 @@ export default async function RootLayout({
       // This will match .au (but not .com.au due to the check above)
       return { 
         GTM_ID: "YOUR_AU_GTM_ID", 
-        GA_ID: "YOUR_AU_GA_ID", 
+        GA_ID: "G-80CQE197ZM", 
         AW_ID: "YOUR_AU_AW_ID" 
       };
     }
