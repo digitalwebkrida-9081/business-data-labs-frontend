@@ -32,13 +32,34 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers();
   const host = headersList.get("host") || "";
-  const isAuDomain = host.includes(".au");
+  
+  // Helper to determine tracking IDs based on the domain
+  const getTrackingIds = (hostname: string) => {
+    // Check .com.au first because it also contains .au
+    if (hostname.includes("businessdatalabs.com.au")) {
+      return { 
+        GTM_ID: "YOUR_COM_AU_GTM_ID", 
+        GA_ID: "G-Y9JYHWDQJR", // ID you provided earlier
+        AW_ID: "YOUR_COM_AU_AW_ID" 
+      };
+    }
+    if (hostname.includes("businessdatalabs.au")) {
+      // This will match .au (but not .com.au due to the check above)
+      return { 
+        GTM_ID: "YOUR_AU_GTM_ID", 
+        GA_ID: "YOUR_AU_GA_ID", 
+        AW_ID: "YOUR_AU_AW_ID" 
+      };
+    }
+    // Default to .com
+    return { 
+      GTM_ID: "GTM-WDLCQLB9", 
+      GA_ID: "G-V7YK8CSH0Q", 
+      AW_ID: "" 
+    };
+  };
 
-  // Specific tracking IDs based on domain
-  // TODO: Replace placeholders with the actual .au GTM and GA/AW IDs
-  const GTM_ID = isAuDomain ? "YOUR_AU_GTM_ID" : "GTM-WDLCQLB9";
-  const GA_ID = isAuDomain ? "G-H1QRF4YTR4" : "G-V7YK8CSH0Q";
-  const AW_ID = isAuDomain ? "" : ""; // Optional: keep empty if not applicable
+  const { GTM_ID, GA_ID, AW_ID } = getTrackingIds(host);
 
   return (
     <html lang="en">
