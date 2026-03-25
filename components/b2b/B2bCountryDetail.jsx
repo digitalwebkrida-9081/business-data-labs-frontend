@@ -44,7 +44,7 @@ const B2bCountryDetail = ({ countrySlug }) => {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
                 const countryCodeToUse = staticCountry ? staticCountry.code : 'US';
                 const [catRes, statesRes] = await Promise.all([
-                    fetch(`${API_URL}/api/merged/categories?country=${countryCodeToUse}&limit=200`),
+                    fetch(`${API_URL}/api/merged/categories?country=${countryCodeToUse}&limit=10000`),
                     fetch(`${API_URL}/api/location/states?country=${encodeURIComponent(formattedCountryName)}`)
                 ]);
 

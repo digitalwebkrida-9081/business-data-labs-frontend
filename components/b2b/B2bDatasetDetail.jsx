@@ -404,7 +404,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
 
                         const [dataRes, catRes] = await Promise.all([
                             fetch(dataUrl),
-                            fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=1000`)
+                            fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=10000`)
                         ]);
                         
                         const dataResult = await dataRes.json();
