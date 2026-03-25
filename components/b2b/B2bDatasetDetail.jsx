@@ -108,6 +108,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
     });
     const [isFormComplete, setIsFormComplete] = useState(false);
     const [hasAutoOpened, setHasAutoOpened] = useState(false);
+    const [userCurrency, setUserCurrency] = useState(null); // { currency, symbol, rate, name, needsConversion }
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -531,6 +532,30 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
         fetchData();
     }, [id, country, category, filterState, filterCity, initialDataset]);
 
+    // Fetch user's local currency exchange rate on mount
+    useEffect(() => {
+        const fetchCurrency = async () => {
+            try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+                const res = await fetch(`${API_URL}/api/currency/rate`);
+                const result = await res.json();
+                if (result.success && result.data && result.data.needsConversion) {
+                    setUserCurrency(result.data);
+                }
+            } catch (err) {
+                console.warn('Currency detection failed:', err);
+            }
+        };
+        fetchCurrency();
+    }, []);
+
+    // Helper to format converted price
+    const getConvertedPrice = (usdPrice) => {
+        if (!userCurrency || !userCurrency.needsConversion || !userCurrency.rate) return null;
+        const converted = parseFloat(usdPrice) * userCurrency.rate;
+        return `${userCurrency.symbol}${converted.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${userCurrency.currency}`;
+    };
+
     // Track if sample modal has been opened manually or automatically
     useEffect(() => {
         if (isSampleModalOpen && !hasAutoOpened) {
@@ -663,12 +688,25 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                             const discount = (priceVal && prevVal) 
                                                 ? Math.round(((parseFloat(prevVal) - parseFloat(priceVal)) / parseFloat(prevVal)) * 100)
                                                 : 50;
+                                            const convertedPrice = getConvertedPrice(priceVal);
+                                            const convertedPrev = getConvertedPrice(prevVal);
                                             
                                             return (
                                                 <>
-                                                    <span className="text-4xl font-extrabold text-blue-500">{formatPrice(p)}</span>
-                                                    <span className="text-xl text-slate-500 line-through font-medium mb-1">{formatPrice(pp)}</span>
-                                                    <span className="text-white text-xl mb-1">(Holiday Discount: {discount}% OFF)</span>
+                                                    <div className="flex items-end gap-3">
+                                                        <span className="text-4xl font-extrabold text-blue-500">{formatPrice(p)}</span>
+                                                        <span className="text-xl text-slate-500 line-through font-medium mb-1">{formatPrice(pp)}</span>
+                                                        <span className="text-white text-xl mb-1">(Holiday Discount: {discount}% OFF)</span>
+                                                    </div>
+                                                    {convertedPrice && (
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="text-blue-300 text-lg font-semibold">≈ {convertedPrice}</span>
+                                                            {convertedPrev && (
+                                                                <span className="text-slate-500 text-sm line-through">≈ {convertedPrev}</span>
+                                                            )}
+                                                            <span className="text-slate-500 text-xs ml-1 bg-slate-800/50 px-2 py-0.5 rounded-full">Live rate</span>
+                                                        </div>
+                                                    )}
                                                 </>
                                             );
                                         })()}
@@ -1001,8 +1039,16 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                         {/* Title */}
                         <div className="text-center mb-8">
                             <h3 className="text-xl font-bold text-slate-900 mb-2">
-                                Purchase lead list of <span className="text-blue-600">{dataset.category}</span> in <span className="text-blue-600">{dataset.location}</span> ({dataset.price})
+                                Purchase lead list of <span className="text-blue-600">{dataset.category}</span> in <span className="text-blue-600">{dataset.location}</span>
                             </h3>
+                            <div className="flex flex-col items-center gap-1 mb-1">
+                                <span className="text-2xl font-extrabold text-slate-900">${String(dataset.price || 199).replace(/[^0-9.]/g, '')} USD</span>
+                                {getConvertedPrice(String(dataset.price || 199).replace(/[^0-9.]/g, '')) && (
+                                    <span className="text-blue-600 text-sm font-medium">≈ {getConvertedPrice(String(dataset.price || 199).replace(/[^0-9.]/g, ''))}
+                                        <span className="text-slate-400 text-xs ml-1">(live rate)</span>
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-slate-500 text-sm">Fill in the below details</p>
                         </div>
 
