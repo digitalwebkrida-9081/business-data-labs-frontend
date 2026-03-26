@@ -126,7 +126,7 @@ export default function ContactUsPage() {
                     const res = await fetch(`${API_URL}/api/forms/submit`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(payload),
+                      body: JSON.stringify({ ...payload, source: window.location.hostname }),
                     });
                     if (res.ok) {
                       alert("Message sent successfully!");
