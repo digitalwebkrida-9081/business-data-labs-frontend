@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {   FaTimes,
-  FaShoppingCart,
+  FaShoppingCart,FaCheckCircle,FaDownload,FaChartLine,FaGlobe,FaLock,FaEnvelope,FaMapMarkerAlt,FaPhone,FaUser,FaBuilding,FaIndustry
 } from "react-icons/fa";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { MdVerified, MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
