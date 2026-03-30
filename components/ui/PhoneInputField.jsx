@@ -24,7 +24,7 @@ const PhoneInputField = ({
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
             )}
-            <div className="phone-input-container">
+            <div className="phone-input-container relative">
                 <PhoneInput
                     defaultCountry="in"
                     value={value}
@@ -37,6 +37,24 @@ const PhoneInputField = ({
                     }}
                     containerClassName="!flex !w-full"
                 />
+                {required && (
+                    <input
+                        type="text"
+                        value={value && value.replace(/\D/g, '').length > 3 ? value : ""}
+                        required
+                        readOnly
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: "50%",
+                            width: "1px",
+                            height: "1px",
+                            opacity: 0,
+                            pointerEvents: "none",
+                        }}
+                        tabIndex={-1}
+                    />
+                )}
             </div>
             <style jsx global>{`
                 .react-international-phone-input-container {

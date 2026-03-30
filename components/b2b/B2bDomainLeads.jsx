@@ -27,7 +27,18 @@ const B2bDomainLeads = ({ country = "United States" }) => {
 
     const handlePurchase = (e) => {
         e.preventDefault();
-        alert(`Purchase initiated for ${form.fullName}. This is a simulation.`);
+        const fullName = form.fullName?.trim();
+        const email = form.email?.trim();
+        const phone = form.phoneNumber?.trim();
+
+        const isPhoneValid = phone && phone.replace(/\D/g, '').length > 3;
+
+        if (!fullName || !email || !isPhoneValid) {
+            alert("Please fill in all required fields (Name, Email, and a valid Phone number).");
+            return;
+        }
+
+        alert(`Purchase initiated for ${fullName}. This is a simulation.`);
         setIsModalOpen(false);
     };
 
