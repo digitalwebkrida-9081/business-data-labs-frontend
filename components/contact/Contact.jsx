@@ -119,7 +119,7 @@ export default function ContactUsPage() {
                   const phone = formData.phone?.trim();
                   const message = formData.message?.trim();
 
-                  const isPhoneValid = phone && phone.replace(/\D/g, '').length > 3;
+                  const isPhoneValid = phone && phone.replace(/\D/g, '').length >= 8;
 
                   if (!formData.firstName.trim() || !formData.lastName.trim() || !email || !isPhoneValid || !message) {
                     alert("Please fill in all mandatory fields (*).");

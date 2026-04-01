@@ -31,7 +31,7 @@ const B2bDomainLeads = ({ country = "United States" }) => {
         const email = form.email?.trim();
         const phone = form.phoneNumber?.trim();
 
-        const isPhoneValid = phone && phone.replace(/\D/g, '').length > 3;
+        const isPhoneValid = phone && phone.replace(/\D/g, '').length >= 8;
 
         if (!fullName || !email || !isPhoneValid) {
             alert("Please fill in all required fields (Name, Email, and a valid Phone number).");

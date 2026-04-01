@@ -83,7 +83,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
 
     const handleSampleDownload = async (e) => {
         e.preventDefault();
-        const isPhoneValid = sampleForm.phoneNumber && sampleForm.phoneNumber.replace(/\D/g, '').length > 3;
+        const isPhoneValid = sampleForm.phoneNumber && sampleForm.phoneNumber.replace(/\D/g, '').length >= 8;
         if (!sampleForm.fullName.trim() || !sampleForm.email.trim() || !isPhoneValid) {
             alert("Please fill in all required fields (Name, Email, and a valid Phone number).");
             return;
@@ -784,7 +784,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                             const email = formData.get('email')?.trim();
                             const phone = phoneCode?.trim();
                             const message = formData.get('message')?.trim();
-                            const isPhoneValid = phone && phone.replace(/\D/g, '').length > 3;
+                            const isPhoneValid = phone && phone.replace(/\D/g, '').length >= 8;
 
                             if (!name || !email || !isPhoneValid || !message) {
                                 alert("Please fill in all mandatory fields (*).");
