@@ -16,7 +16,10 @@ export default function Logos() {
                 {['Walmart', 'KPMG', 'Citi', 'JLL', 'Kroger', 'Deloitte', 'McKinsey', 'Goldman Sachs'].map((brand, i) => (
                   <span
                     key={`${loopIdx}-${i}`}
-                    className="logo-brand text-lg md:text-xl font-bold tracking-tight whitespace-nowrap cursor-default select-none"
+                    className="text-lg md:text-xl font-bold tracking-tight whitespace-nowrap transition-all duration-300 hover:opacity-100 cursor-default select-none"
+                    style={{ color: 'rgba(148, 163, 184, 0.3)' }}
+                    onMouseEnter={(e) => e.target.style.color = 'rgba(148, 163, 184, 0.7)'}
+                    onMouseLeave={(e) => e.target.style.color = 'rgba(148, 163, 184, 0.3)'}
                   >
                     {brand}
                   </span>

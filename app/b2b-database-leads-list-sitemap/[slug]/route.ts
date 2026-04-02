@@ -80,7 +80,7 @@ export async function GET(
         const categorySlug = cat.name; // Already slugified (e.g., "schools", "restaurants")
 
         return {
-          url: `${baseUrl}/b2b-database/leads-list-of-${categorySlug}-in-${countrySlug}`,
+          url: `${baseUrl}/b2b-database/leads-list-of-${categorySlug.replace(/_/g, '-')}-in-${countrySlug}`,
           lastModified: cat.lastModified ? new Date(cat.lastModified).toISOString() : new Date().toISOString(),
           changeFrequency: 'weekly',
           priority: '0.6',

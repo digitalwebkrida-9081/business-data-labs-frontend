@@ -233,7 +233,7 @@ const B2bCountryDetail = ({ countrySlug }) => {
                              // Random number simulation for "social proof" feel, or could use real counts if available
                             const randomNum = Math.floor(Math.random() * 5000) + 1000; 
                             const catDisplayName = cat.displayName || cat.name;
-                            const categorySlug = cat.displayName ? cat.name : (cat.name || '').replace(/\s+/g, '_');
+                            const categorySlug = (cat.displayName ? cat.name : (cat.name || '').replace(/\s+/g, '-')).replace(/_/g, '-');
                             const targetHref = `/b2b-database/leads-list-of-${categorySlug}-in-${displayName.toLowerCase().replace(/\s+/g, '-')}`;
                                 
                                 

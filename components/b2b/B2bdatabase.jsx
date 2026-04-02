@@ -343,7 +343,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                                                 {datasets.map((item) => (
                                                     <tr key={item.id} className="group">
                                                         <td className="font-medium whitespace-wrap">
-                                                            <Link href={item.countryCode ? `/b2b-database/leads-list-of-${item.categorySlug}-in-${(item.countryName || "").toLowerCase().replace(/\s+/g, '-')}` : `/dataset-detail?id=${item.id}&label=${encodeURIComponent(item.displayLoc || "")}`}
+                                                            <Link href={item.countryCode ? `/b2b-database/leads-list-of-${(item.categorySlug || "").replace(/_/g, '-')}-in-${(item.countryName || "").toLowerCase().replace(/\s+/g, '-')}` : `/dataset-detail?id=${item.id}&label=${encodeURIComponent(item.displayLoc || "")}`}
                                                                   className="text-[14px] text-slate-300 hover:text-indigo-400 transition font-medium">
                                                                 {item.name}
                                                             </Link>
@@ -357,7 +357,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                                                                     className="btn-ghost !py-2 !px-4 !rounded-full text-[12px] !border-slate-700 hover:!border-indigo-500 whitespace-nowrap">
                                                                     Sample Leads
                                                                 </button>
-                                                                <Link href={item.countryCode ? `/b2b-database/leads-list-of-${item.categorySlug}-in-${(item.countryName || "").toLowerCase().replace(/\s+/g, '-')}` : `/dataset-detail?id=${item.id}&label=${encodeURIComponent(item.displayLoc || "")}`}
+                                                                <Link href={item.countryCode ? `/b2b-database/leads-list-of-${(item.categorySlug || "").replace(/_/g, '-')}-in-${(item.countryName || "").toLowerCase().replace(/\s+/g, '-')}` : `/dataset-detail?id=${item.id}&label=${encodeURIComponent(item.displayLoc || "")}`}
                                                                     className="btn-primary !py-2 !px-4 !rounded-full text-[12px] whitespace-nowrap">
                                                                     Purchase Leads
                                                                 </Link>

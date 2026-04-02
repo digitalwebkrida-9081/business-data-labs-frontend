@@ -100,7 +100,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                 try { await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'purchase', name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, totalRecords: dataset.totalRecords }, source: window.location.hostname }) }); } catch (e) { console.warn('Form submission failed:', e); }
                 let allRows = []; let page = 1; const batchSize = 5000; let hasMore = true;
                 while (hasMore) {
-                    const res = await fetch(`${API_URL}/api/merged/data?country=${countryApiCode}&category=${category}&page=${page}&limit=${batchSize}${filterState ? `&state=${encodeURIComponent(filterState)}` : ''}${filterCity ? `&city=${encodeURIComponent(filterCity)}` : ''}`);
+                    const res = await fetch(`${API_URL}/api/merged/data?country=${countryApiCode}&category=${category.replace(/-/g, '_')}&page=${page}&limit=${batchSize}${filterState ? `&state=${encodeURIComponent(filterState)}` : ''}${filterCity ? `&city=${encodeURIComponent(filterCity)}` : ''}`);
                     const result = await res.json();
                     if (result.success && result.data?.data?.length > 0) { allRows = allRows.concat(result.data.data); hasMore = result.data.pagination?.page < result.data.pagination?.totalPages; page++; } else { hasMore = false; }
                 }
@@ -132,17 +132,20 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
                 if (country && category) {
                     try {
-                        let dataUrl = `${API_URL}/api/merged/data?country=${countryApiCode}&category=${category}&page=1&limit=10`;
+                        let dataUrl = `${API_URL}/api/merged/data?country=${countryApiCode}&category=${category.replace(/-/g, '_')}&page=1&limit=10`;
                         if (filterState) dataUrl += `&state=${encodeURIComponent(filterState)}`;
                         if (filterCity) dataUrl += `&city=${encodeURIComponent(filterCity)}`;
-                        const [dataRes, catRes] = await Promise.all([fetch(dataUrl), fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=10000`)]);
+                        const [dataRes, catRes] = await Promise.all([
+                            fetch(dataUrl),
+                            fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=10000`)
+                        ]);
                         const dataResult = await dataRes.json(); const catResult = await catRes.json();
-                        const catInfo = catResult.success && catResult.data?.categories ? catResult.data.categories.find(c => c.name === category) : null;
+                        const catInfo = catResult.success && catResult.data?.categories ? catResult.data.categories.find(c => c.name === category || c.name === category.replace(/-/g, '_')) : null;
                         const dataTotal = dataResult.data?.pagination?.total || 0;
                         const totalRecords = (filterState || filterCity) ? dataTotal : (catInfo?.records || dataTotal || 0);
                         const rows = dataResult.success ? (dataResult.data?.data || dataResult.data?.rows || []) : [];
                         const locationName = displayLabel || country.toUpperCase();
-                        const categoryDisplayName = catInfo?.displayName || category.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        const categoryDisplayName = catInfo?.displayName || category.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                         const firstRow = rows[0] || {}; const columns = Object.keys(firstRow);
                         const hasEmail = catInfo?.hasEmail || columns.some(c => c.toLowerCase().includes('email'));
                         const hasPhone = catInfo?.hasPhone || columns.some(c => c.toLowerCase().includes('phone'));
