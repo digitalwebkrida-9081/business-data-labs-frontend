@@ -183,7 +183,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                         "Country": item.country,
                         "Phone": "Available in Full List (Verified)", // Masked
                         "Email": "Available in Full List (Verified)", // Masked
-                        "Website": item.website ? "Available" : "--",
+                        "Website": item.website || "--",
                         "Rating": item.rating,
                         "Reviews": item.reviews
                     }));

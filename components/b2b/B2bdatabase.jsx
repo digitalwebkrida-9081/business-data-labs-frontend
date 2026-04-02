@@ -122,22 +122,64 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
             // Generate Excel File
             const wb = XLSX.utils.book_new();
             
-            // Create Mock/Sample data for Excel 
-            // Since we are in the list view, we might not have the full sample array. 
-            // We can generate dummy data effectively or use what we have.
-            // For now, let's create generic rows since we don't have the `sampleList` array in `datasets` state usually (unless we add it to search mapping)
-            const exportData = Array(5).fill(null).map((_, i) => ({
-                "Business Name": `${selectedDatasetForSample?.category || 'Business'} ${i+1}`,
-                "Address": "Available in Full List",
-                "City": selectedDatasetForSample?.displayLoc?.split(',')[0] || 'City',
-                "State": "State",
-                "Country": "Country",
-                "Phone": "Available in Full List (Verified)", 
-                "Email": "Available in Full List (Verified)",
-                "Website": "Available",
-                "Rating": (4 + Math.random()).toFixed(1),
-                "Reviews": Math.floor(Math.random() * 500)
-            }));
+            // Fetch real sample data instead of dummy data
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+            let dataUrl = `${API_URL}/api/merged/data?country=${selectedDatasetForSample?.countryCode || 'US'}&category=${selectedDatasetForSample?.categorySlug || 'business'}&page=1&limit=5`;
+            if (selectedDatasetForSample?.stateName) dataUrl += `&state=${encodeURIComponent(selectedDatasetForSample.stateName)}`;
+            if (selectedDatasetForSample?.cityName) dataUrl += `&city=${encodeURIComponent(selectedDatasetForSample.cityName)}`;
+
+            let rows = [];
+            try {
+                const res = await fetch(dataUrl);
+                const dataResult = await res.json();
+                if (dataResult.success) {
+                    rows = dataResult.data?.data || dataResult.data?.rows || [];
+                }
+            } catch (e) {
+                console.error("Failed to fetch real sample data: ", e);
+            }
+
+            const getCol = (cols, pattern) => cols.find(c => pattern.test(c));
+
+            // Map real or fallback data
+            const exportData = (rows.length > 0 ? rows : Array(5).fill(null)).map((row, i) => {
+                if (!row) {
+                    return {
+                        "Business Name": `${selectedDatasetForSample?.category || "Business"} ${i + 1}`,
+                        "Address": "Available in Full List",
+                        "City": selectedDatasetForSample?.displayLoc?.split(',')[0] || "City",
+                        "State": "State",
+                        "Country": "Country",
+                        "Phone": "Available in Full List (Verified)",
+                        "Email": "Available in Full List (Verified)",
+                        "Website": "--",
+                        "Rating": (4 + Math.random()).toFixed(1),
+                        "Reviews": Math.floor(Math.random() * 500)
+                    };
+                }
+
+                const cols = Object.keys(row);
+                const nameCol = getCol(cols, /^(name|business|company|title)/i) || cols[0];
+                const cityCol = getCol(cols, /^city/i);
+                const stateCol = getCol(cols, /^(state|province|region)/i);
+                const countryCol = getCol(cols, /^country/i);
+                const websiteCol = getCol(cols, /^(website|url)/i);
+                const ratingCol = getCol(cols, /^(rating|stars)/i);
+                const reviewCol = getCol(cols, /^(review|total.?review)/i);
+
+                return {
+                    "Business Name": row[nameCol] || `${selectedDatasetForSample?.category || "Business"} ${i + 1}`,
+                    "Address": "Available in Full List",
+                    "City": cityCol ? row[cityCol] : (selectedDatasetForSample?.displayLoc?.split(",")[0] || "City"),
+                    "State": stateCol ? row[stateCol] : "State",
+                    "Country": countryCol ? row[countryCol] : "Country",
+                    "Phone": "Available in Full List (Verified)",
+                    "Email": "Available in Full List (Verified)",
+                    "Website": websiteCol && row[websiteCol] ? row[websiteCol] : "--",
+                    "Rating": ratingCol ? row[ratingCol] : (4 + Math.random()).toFixed(1),
+                    "Reviews": reviewCol ? row[reviewCol] : Math.floor(Math.random() * 500),
+                };
+            });
 
             const ws = XLSX.utils.json_to_sheet(exportData);
             
