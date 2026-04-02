@@ -1,60 +1,52 @@
 const trusted = [
-  { image: "images/svg/w1.svg", desc: "Trusted by 76 out of Fortune 500 companies for workflow automation and data collection" },
-  { image: "images/svg/w2.svg", desc: "Trusted by most valuable brands in the world for protection against counterfeits" },
-  { image: "images/svg/w3.svg", desc: "Trusted by some of the largest real estate investments firms" },
-  { image: "images/svg/w4.svg", desc: "Trusted by thousands of startups and established enterprises for sales data mining" },
-  { image: "images/svg/w5.svg", desc: "Trusted by top 10 e-commerce companies to get insight into competitor’s products" },
-  { image: "images/svg/w6.svg", desc: "Trusted by top researchers and journalist to source data" },
-  { image: "images/svg/w7.svg", desc: "Trusted by some of the largest recruitment firms" },
+  { icon: "🏢", desc: "Trusted by 76 out of Fortune 500 companies for workflow automation and data collection", accent: "#6366F1" },
+  { icon: "🛡️", desc: "Trusted by most valuable brands in the world for protection against counterfeits", accent: "#22D3EE" },
+  { icon: "🏠", desc: "Trusted by some of the largest real estate investment firms globally", accent: "#10B981" },
+  { icon: "🚀", desc: "Trusted by thousands of startups and enterprises for sales data mining", accent: "#F59E0B" },
+  { icon: "🛒", desc: "Trusted by top 10 e-commerce companies for competitor product insights", accent: "#EC4899" },
+  { icon: "📰", desc: "Trusted by top researchers and journalists to source verified data", accent: "#8B5CF6" },
+  { icon: "👥", desc: "Trusted by some of the largest recruitment firms worldwide", accent: "#14B8A6" },
 ];
 
 export default function Trusted() {
   return (
-    <section className="py-24 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-6 text-center">
+    <section className="section-padding relative" style={{ background: 'var(--bg-secondary)' }}>
+      <div className="absolute inset-0 grid-pattern pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
+        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-4"
+              style={{ background: 'rgba(34, 211, 238, 0.1)', border: '1px solid rgba(34, 211, 238, 0.2)', color: '#22D3EE' }}>
+          Social Proof
+        </span>
         
-        <h2 className="text-3xl md:text-4xl font-bold text-[#030e21] mb-6">
-          Trusted by Industry Leaders
+        <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+          Trusted by <span className="gradient-text">Industry Leaders</span>
         </h2>
 
-        <p className="max-w-4xl mx-auto text-slate-600 text-lg leading-relaxed mb-16">
+        <p className="max-w-3xl mx-auto text-slate-400 text-lg leading-relaxed mb-14">
           Web scraping solutions empower businesses to extract online data and transform it
           into structured insights that drive value across applications, fuelling growth and innovation.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-6">
-           {trusted.map((item, index) => (
-             <div key={index} className={`w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[380px] grow-0`}>
-                <Card {...item} />
-             </div>
-           ))}
-        </div>
+        <div className="flex flex-wrap justify-center gap-5">
+          {trusted.map((item, index) => (
+            <div key={index} className="w-full md:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] xl:w-[370px] grow-0">
+              <div className="glass-card h-full !p-6 flex items-start gap-5 text-left group animate-fadeInUp"
+                   style={{ animationDelay: `${index * 80}ms` }}>
+                {/* Icon */}
+                <div className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all duration-300 group-hover:scale-110"
+                     style={{ background: `${item.accent}12`, border: `1px solid ${item.accent}20` }}>
+                  {item.icon}
+                </div>
 
+                <p className="text-[14px] font-medium text-slate-400 leading-relaxed group-hover:text-slate-300 transition-colors duration-300">
+                  {item.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
-
-function Card({ image, desc }) {
-  return (
-    <div className="h-full bg-white border border-slate-200 rounded-2xl p-6 flex items-start gap-5 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 group text-left">
-      
-      {/* Icon Wrapper */}
-      <div className="shrink-0 w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300">
-        <img
-          src={image}
-          alt=""
-          className="w-8 h-8 object-contain brightness-0 opacity-60 group-hover:opacity-100 group-hover:brightness-0 group-hover:invert transition-all duration-300"
-          draggable={false}
-        />
-      </div>
-
-      {/* Text */}
-      <p className="text-[15px] font-medium text-slate-600 leading-relaxed group-hover:text-slate-800 transition-colors">
-        {desc}
-      </p>
-
-    </div>
-  );
-}
-

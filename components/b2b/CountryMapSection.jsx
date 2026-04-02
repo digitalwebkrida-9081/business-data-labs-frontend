@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
-// Country code to Highcharts map collection path mapping
 const MAP_PATHS = {
     'in': () => import('@highcharts/map-collection/countries/in/in-all.topo.json'),
     'us': () => import('@highcharts/map-collection/countries/us/us-all.topo.json'),
@@ -54,63 +53,33 @@ const CountryMapSection = ({ category, location, countryCode, stateDistribution,
     const hasData = countryCode && stateDistribution && Object.keys(stateDistribution).length > 0;
 
     useEffect(() => {
-        if (!hasData) {
-            setLoading(false);
-            return;
-        }
-
+        if (!hasData) { setLoading(false); return; }
         const loadDeps = async () => {
             try {
-                // Dynamic import Highcharts with map support
                 const hcModule = await import('highcharts/highmaps');
                 const hc = hcModule.default;
-
-                // Load accessibility (optional, safe to skip if fails)
-                try {
-                    const accModule = await import('highcharts/modules/accessibility');
-                    const accInit = accModule.default || accModule;
-                    if (typeof accInit === 'function') accInit(hc);
-                } catch (e) {}
-
-                // Load the map data
+                try { const accModule = await import('highcharts/modules/accessibility'); const accInit = accModule.default || accModule; if (typeof accInit === 'function') accInit(hc); } catch (e) {}
                 const mapLoader = MAP_PATHS[countryCode];
-                if (!mapLoader) {
-                    setLoading(false);
-                    return;
-                }
-                
+                if (!mapLoader) { setLoading(false); return; }
                 const topoData = await mapLoader();
                 const topology = topoData.default || topoData;
-
-                // Load Highcharts React
                 const hcReactModule = await import('highcharts-react-official');
-
-                setHighcharts(hc);
-                setHighchartsReact(() => hcReactModule.default);
-                setMapData(topology);
-                setLoading(false);
-            } catch (err) {
-                console.error('Error loading map dependencies:', err);
-                setLoading(false);
-            }
+                setHighcharts(hc); setHighchartsReact(() => hcReactModule.default); setMapData(topology); setLoading(false);
+            } catch (err) { console.error('Error loading map dependencies:', err); setLoading(false); }
         };
-
         loadDeps();
     }, [countryCode, hasData]);
 
-    // Don't render if no data
-    if (!hasData) {
-        return null;
-    }
+    if (!hasData) return null;
 
     if (loading) {
         return (
-            <div className="py-16 bg-white">
+            <div className="section-padding" style={{ background: 'var(--bg-primary)' }}>
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto text-center">
                         <div className="animate-pulse">
-                            <div className="h-8 bg-slate-200 rounded w-2/3 mx-auto mb-8"></div>
-                            <div className="h-[400px] bg-slate-100 rounded-xl"></div>
+                            <div className="h-8 rounded w-2/3 mx-auto mb-8" style={{ background: 'var(--bg-elevated)' }}></div>
+                            <div className="h-[400px] rounded-xl" style={{ background: 'var(--bg-elevated)' }}></div>
                         </div>
                     </div>
                 </div>
@@ -118,88 +87,51 @@ const CountryMapSection = ({ category, location, countryCode, stateDistribution,
         );
     }
 
-    if (!mapData || !Highcharts || !HighchartsReact) {
-        return null;
-    }
+    if (!mapData || !Highcharts || !HighchartsReact) return null;
 
-    // Match state distribution keys to hc-key values in the map
-    // The map features have properties like 'name', 'hc-key', etc.
-    // We need to fuzzy match our state names to the map's state names
     const geoFeatures = Highcharts.geojson(mapData, 'map');
-    
     const normalizeStr = (s) => s.toLowerCase().replace(/[^a-z]/g, '').trim();
-    
     const seriesData = [];
     const matched = new Set();
 
     for (const feature of geoFeatures) {
         const featureName = feature.properties?.name || '';
         const featureKey = feature.properties?.['hc-key'] || '';
-        
-        // Try to find a match in stateDistribution
-        let bestMatch = null;
-        let bestValue = 0;
-        
+        let bestMatch = null; let bestValue = 0;
         for (const [stateName, count] of Object.entries(stateDistribution)) {
             const normState = normalizeStr(stateName);
             const normFeature = normalizeStr(featureName);
-            
             if (normState === normFeature || normState.includes(normFeature) || normFeature.includes(normState)) {
-                if (!bestMatch || count > bestValue) {
-                    bestMatch = stateName;
-                    bestValue = count;
-                }
+                if (!bestMatch || count > bestValue) { bestMatch = stateName; bestValue = count; }
             }
         }
-        
-        if (bestMatch) {
-            seriesData.push({
-                'hc-key': featureKey,
-                value: bestValue,
-                name: featureName
-            });
-            matched.add(bestMatch);
-        }
+        if (bestMatch) { seriesData.push({ 'hc-key': featureKey, value: bestValue, name: featureName }); matched.add(bestMatch); }
     }
 
-    // Also add unmatched states as 0 value (they'll still appear on map but without data)
-    
     const chartOptions = {
         chart: {
             map: mapData,
             backgroundColor: 'transparent',
-            style: {
-                fontFamily: 'inherit'
-            },
+            style: { fontFamily: 'var(--font-main, Inter, system-ui, sans-serif)' },
             height: 500
         },
         title: {
             text: `Number of ${category} in ${location}`,
-            style: {
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#1e293b'
-            }
+            style: { fontSize: '18px', fontWeight: 'bold', color: '#f8fafc' }
         },
-        subtitle: {
-            text: null
-        },
-        credits: {
-            enabled: false
-        },
-        mapNavigation: {
-            enabled: false
-        },
+        subtitle: { text: null },
+        credits: { enabled: false },
+        mapNavigation: { enabled: false },
         colorAxis: {
             type: 'logarithmic',
             min: 1,
             max: Math.max(1000000, ...Object.values(stateDistribution)),
             stops: [
-                [0, '#e8e0f0'],
-                [0.25, '#c4b5d6'],
-                [0.5, '#9b86bd'],
-                [0.75, '#6f4e9e'],
-                [1, '#3b1f6e']
+                [0, 'rgba(99, 102, 241, 0.1)'],
+                [0.25, 'rgba(99, 102, 241, 0.25)'],
+                [0.5, 'rgba(99, 102, 241, 0.45)'],
+                [0.75, 'rgba(99, 102, 241, 0.7)'],
+                [1, '#6366F1']
             ],
             labels: {
                 formatter: function () {
@@ -210,31 +142,18 @@ const CountryMapSection = ({ category, location, countryCode, stateDistribution,
                     if (this.value >= 100) return '100';
                     return '1';
                 },
-                style: {
-                    color: '#64748b',
-                    fontSize: '11px'
-                }
+                style: { color: '#64748b', fontSize: '11px' }
             }
         },
         legend: {
-            layout: 'horizontal',
-            align: 'center',
-            verticalAlign: 'bottom',
-            floating: false,
-            backgroundColor: 'transparent',
-            borderWidth: 0,
-            symbolWidth: 300,
-            symbolHeight: 12,
-            itemStyle: {
-                color: '#64748b',
-                fontWeight: 'normal',
-                fontSize: '11px'
-            }
+            layout: 'horizontal', align: 'center', verticalAlign: 'bottom', floating: false,
+            backgroundColor: 'transparent', borderWidth: 0, symbolWidth: 300, symbolHeight: 12,
+            itemStyle: { color: '#64748b', fontWeight: 'normal', fontSize: '11px' }
         },
         tooltip: {
-            backgroundColor: 'white',
-            borderColor: '#e2e8f0',
-            borderRadius: 8,
+            backgroundColor: '#1a1f2e',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 12,
             shadow: true,
             useHTML: true,
             headerFormat: '',
@@ -242,43 +161,31 @@ const CountryMapSection = ({ category, location, countryCode, stateDistribution,
                 <div style="padding: 8px 12px;">
                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                         <span style="width: 10px; height: 10px; border-radius: 50%; background: {point.color}; display: inline-block;"></span>
-                        <span style="font-weight: 700; color: #1e293b; font-size: 13px;">Number of ${category}</span>
+                        <span style="font-weight: 700; color: #f8fafc; font-size: 13px;">Number of ${category}</span>
                     </div>
-                    <div style="color: #475569; font-size: 12px;">{point.name}: <strong style="color: #1e293b;">{point.value:,.0f}</strong></div>
+                    <div style="color: #94a3b8; font-size: 12px;">{point.name}: <strong style="color: #f8fafc;">{point.value:,.0f}</strong></div>
                 </div>
             `
         },
         series: [{
             data: seriesData,
             name: category,
-            states: {
-                hover: {
-                    color: '#3b82f6',
-                    borderColor: '#1e40af',
-                    borderWidth: 2
-                }
-            },
+            states: { hover: { color: '#818CF8', borderColor: '#6366F1', borderWidth: 2 } },
             dataLabels: {
-                enabled: true,
-                format: '{point.name}',
-                style: {
-                    color: '#334155',
-                    fontSize: '9px',
-                    fontWeight: '500',
-                    textOutline: '2px white'
-                }
+                enabled: true, format: '{point.name}',
+                style: { color: '#94a3b8', fontSize: '9px', fontWeight: '500', textOutline: '2px #0A0E1A' }
             },
-            borderColor: '#94a3b8',
+            borderColor: 'rgba(255,255,255,0.1)',
             borderWidth: 0.5,
-            nullColor: '#f1f5f9'
+            nullColor: 'rgba(255,255,255,0.04)'
         }]
     };
 
     return (
-        <div className="py-16 bg-white">
+        <div className="section-padding" style={{ background: 'var(--bg-primary)' }}>
             <div className="container mx-auto px-4">
                 <div className="max-w-3xl mx-auto">
-                    <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 md:p-8">
+                    <div className="glass-card !p-6 md:!p-8 !rounded-2xl">
                         <HighchartsReact
                             highcharts={Highcharts}
                             constructorType="mapChart"

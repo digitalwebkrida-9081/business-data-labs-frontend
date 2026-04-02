@@ -84,7 +84,7 @@ const PhoneInputField = ({
                     placeholder={placeholder}
                     inputClassName="w-full !rounded-md !border !border-gray-200 !px-4 !py-3 !text-sm focus:!ring-2 focus:!ring-blue-500 !outline-none !h-auto !transition-all"
                     countrySelectorStyleProps={{
-                        buttonClassName: "!bg-gray-50 !border !border-gray-200 !rounded-l-md !px-3 !py-3 !h-auto !flex !items-center !justify-center hover:!bg-gray-100",
+                        buttonClassName: "!border !border-glass !rounded-l-md !px-3 !py-3 !h-auto !flex !items-center !justify-center transition-colors",
                         buttonContentClassName: "!flex !items-center !gap-1"
                     }}
                     containerClassName="!flex !w-full shadow-sm rounded-md"
