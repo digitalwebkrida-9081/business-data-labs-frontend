@@ -58,7 +58,7 @@ const PhoneInputField = ({
         return (
             <div className={`w-full ${className}`}>
                  {label && (
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
                         {label} {required && <span className="text-red-500">*</span>}
                     </label>
                 )}
@@ -70,7 +70,7 @@ const PhoneInputField = ({
     return (
         <div className={`w-full ${className}`}>
             {label && (
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
             )}
@@ -82,7 +82,7 @@ const PhoneInputField = ({
                     forceDialCode={true}
                     onChange={(phone) => onChange({ target: { name, value: phone } })}
                     placeholder={placeholder}
-                    inputClassName="w-full !rounded-md !border !border-gray-200 !px-4 !py-3 !text-sm focus:!ring-2 focus:!ring-blue-500 !outline-none !h-auto !transition-all"
+                    inputClassName="w-full !rounded-r-md !border !border-glass !px-4 !py-3 !text-sm focus:!ring-2 focus:!ring-indigo-500/30 !outline-none !h-auto !transition-all !bg-elevated !text-white"
                     countrySelectorStyleProps={{
                         buttonClassName: "!border !border-glass !rounded-l-md !px-3 !py-3 !h-auto !flex !items-center !justify-center transition-colors",
                         buttonContentClassName: "!flex !items-center !gap-1"
@@ -118,14 +118,26 @@ const PhoneInputField = ({
                 }
                 .react-international-phone-input {
                     width: 100% !important;
-                    border-radius: 0 0.375rem 0.375rem 0 !important;
+                    background-color: var(--bg-elevated) !important;
+                    border-radius: 0 12px 12px 0 !important;
+                    border: 1px solid var(--border-glass) !important;
                     border-left: none !important;
+                    color: white !important;
                 }
                 .react-international-phone-country-selector-button {
+                    background-color: var(--bg-elevated) !important;
+                    border: 1px solid var(--border-glass) !important;
                     border-right: none !important;
+                    border-radius: 12px 0 0 12px !important;
+                    padding: 0 12px !important;
                 }
                 .react-international-phone-country-selector-button:focus-within {
                     z-index: 10;
+                    border-color: var(--accent-primary) !important;
+                }
+                .react-international-phone-input:focus {
+                    border-color: var(--accent-primary) !important;
+                    box-shadow: 0 0 0 3px var(--glow-primary) !important;
                 }
             `}</style>
         </div>
