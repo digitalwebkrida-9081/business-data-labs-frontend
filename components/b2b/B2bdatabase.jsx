@@ -93,6 +93,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                         state: selectedDatasetForSample.stateName,
                         city: selectedDatasetForSample.cityName,
                     },
+                    source: window.location.hostname,
                 })
             });
         } catch (error) { console.error("Error submitting sample request:", error); }

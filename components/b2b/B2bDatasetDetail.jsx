@@ -113,7 +113,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                 alert(`Purchase Successful! Downloaded records.`); setIsModalOpen(false); setIsFormComplete(false);
                 if (typeof window !== 'undefined' && window.gtag) { window.gtag('event', 'conversion', { 'send_to': 'AW-17980750879/Us-BCLTm4YMcEJ_48f1C', 'value': dataset?.price || 1.0, 'currency': 'INR', 'transaction_id': '' }); }
             } else {
-                const response = await fetch(`${API_URL}/api/scraper/dataset/purchase`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, ...form, phoneNumber: form.phoneNumber }) });
+                const response = await fetch(`${API_URL}/api/scraper/dataset/purchase`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id, ...form, phoneNumber: form.phoneNumber, source: window.location.hostname }) });
                 if (response.ok) {
                     const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${dataset.category}-${dataset.location}.xlsx`; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
                     alert(`Purchase Successful! Downloading file...`); setIsModalOpen(false); setIsFormComplete(false);
@@ -543,7 +543,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagservice.datasellerhub.com";
                                                 let finalPrice = dataset.price || "199.00";
                                                 try { finalPrice = parseFloat(dataset.price).toFixed(2); } catch (e) {}
-                                                const response = await fetch(`${API_URL}/api/payment/create-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, price: finalPrice }) });
+                                                const response = await fetch(`${API_URL}/api/payment/create-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, price: finalPrice, source: window.location.hostname }) });
                                                 const orderData = await response.json();
                                                 if (orderData.data?.id) return orderData.data.id;
                                                 else if (orderData.id) return orderData.id;
@@ -552,7 +552,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                             onApprove={async (data, actions) => {
                                                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagservice.datasellerhub.com";
                                                 try {
-                                                    const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderID: data.orderID, name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity } }) });
+                                                    const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderID: data.orderID, name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, source: window.location.hostname }) });
                                                     const orderData = await response.json();
                                                     if (orderData.success) await processDownloadAfterPayment();
                                                     else alert("Payment capture failed. Please try again.");
