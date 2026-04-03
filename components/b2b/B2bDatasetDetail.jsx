@@ -76,7 +76,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
         try {
             const XLSX = await import('xlsx');
             const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-            await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sample_request', name: sampleForm.fullName, email: sampleForm.email, phone: sampleForm.phoneNumber, datasetDetails: { id: dataset.id, category: dataset.category, location: dataset.location }, source: window.location.hostname }) }).catch(error => { console.error("Error submitting sample request API:", error); });
+            await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sample_request', name: sampleForm.fullName, email: sampleForm.email, phone: sampleForm.phoneNumber, datasetDetails: { id: dataset.id, category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, source: window.location.hostname }) }).catch(error => { console.error("Error submitting sample request API:", error); });
             setTimeout(() => {
                 try {
                     const wb = XLSX.utils.book_new();
@@ -97,7 +97,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
             if (dataset?.mergedData && country && category) {
-                try { await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'purchase', name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, totalRecords: dataset.totalRecords }, source: window.location.hostname }) }); } catch (e) { console.warn('Form submission failed:', e); }
+                try { await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'purchase', name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity, totalRecords: dataset.totalRecords }, source: window.location.hostname }) }); } catch (e) { console.warn('Form submission failed:', e); }
                 let allRows = []; let page = 1; const batchSize = 5000; let hasMore = true;
                 while (hasMore) {
                     const res = await fetch(`${API_URL}/api/merged/data?country=${countryApiCode}&category=${category.replace(/-/g, '_')}&page=${page}&limit=${batchSize}${filterState ? `&state=${encodeURIComponent(filterState)}` : ''}${filterCity ? `&city=${encodeURIComponent(filterCity)}` : ''}`);
@@ -543,7 +543,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagservice.datasellerhub.com";
                                                 let finalPrice = dataset.price || "199.00";
                                                 try { finalPrice = parseFloat(dataset.price).toFixed(2); } catch (e) {}
-                                                const response = await fetch(`${API_URL}/api/payment/create-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ datasetDetails: { category: dataset.category, location: dataset.location }, price: finalPrice }) });
+                                                const response = await fetch(`${API_URL}/api/payment/create-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, price: finalPrice }) });
                                                 const orderData = await response.json();
                                                 if (orderData.data?.id) return orderData.data.id;
                                                 else if (orderData.id) return orderData.id;
@@ -552,7 +552,7 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                                             onApprove={async (data, actions) => {
                                                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://stagservice.datasellerhub.com";
                                                 try {
-                                                    const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderID: data.orderID, name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country } }) });
+                                                    const response = await fetch(`${API_URL}/api/payment/capture-paypal-order`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderID: data.orderID, name: form.fullName, email: form.email, phone: form.phoneNumber, datasetDetails: { category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity } }) });
                                                     const orderData = await response.json();
                                                     if (orderData.success) await processDownloadAfterPayment();
                                                     else alert("Payment capture failed. Please try again.");

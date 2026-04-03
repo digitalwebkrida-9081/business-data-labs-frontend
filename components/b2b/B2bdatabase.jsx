@@ -87,7 +87,12 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                 body: JSON.stringify({
                     type: 'sample_request', name: sampleForm.fullName,
                     email: sampleForm.email, phone: sampleForm.phoneNumber,
-                    datasetDetails: selectedDatasetForSample, source: window.location.hostname
+                    datasetDetails: {
+                        ...selectedDatasetForSample,
+                        country: selectedDatasetForSample.countryName,
+                        state: selectedDatasetForSample.stateName,
+                        city: selectedDatasetForSample.cityName,
+                    },
                 })
             });
         } catch (error) { console.error("Error submitting sample request:", error); }
