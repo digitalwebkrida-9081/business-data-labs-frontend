@@ -163,7 +163,36 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                             const ratingCol = columns.find(c => /^(rating|stars)/i.test(c)); const reviewCol = columns.find(c => /^(review|total.?review)/i.test(c));
                             return { name: row[nameCol] || `${categoryDisplayName} ${idx + 1}`, city: cityCol ? row[cityCol] : '', state: stateCol ? row[stateCol] : '', country: countryCol ? row[countryCol] : locationName, website: websiteCol ? row[websiteCol] : '', rating: ratingCol ? row[ratingCol] : (4 + Math.random()).toFixed(1), reviews: reviewCol ? row[reviewCol] : Math.floor(Math.random() * 500) };
                         });
-                        const mergedDataset = { id: `merged-${country}-${category}`, category: categoryDisplayName, location: locationName, totalRecords, emailCount: hasEmail ? totalRecords : 0, totalEmails: hasEmail ? totalRecords : 0, phones: hasPhone ? totalRecords : 0, totalPhones: hasPhone ? totalRecords : 0, websiteCount: hasWebsite ? Math.floor(totalRecords * 0.7) : 0, totalWebsites: hasWebsite ? Math.floor(totalRecords * 0.7) : 0, linkedinCount: hasLinkedin ? Math.floor(totalRecords * 0.6) : 0, totalLinkedin: hasLinkedin ? Math.floor(totalRecords * 0.6) : 0, facebookCount: hasFacebook ? Math.floor(totalRecords * 0.65) : 0, totalFacebook: hasFacebook ? Math.floor(totalRecords * 0.65) : 0, instagramCount: hasInstagram ? Math.floor(totalRecords * 0.5) : 0, totalInstagram: hasInstagram ? Math.floor(totalRecords * 0.5) : 0, twitterCount: hasTwitter ? Math.floor(totalRecords * 0.3) : 0, totalTwitter: hasTwitter ? Math.floor(totalRecords * 0.3) : 0, tiktokCount: hasTiktok ? Math.floor(totalRecords * 0.2) : 0, totalTiktok: hasTiktok ? Math.floor(totalRecords * 0.2) : 0, youtubeCount: hasYoutube ? Math.floor(totalRecords * 0.25) : 0, totalYoutube: hasYoutube ? Math.floor(totalRecords * 0.25) : 0, price: catInfo?.price ? parseFloat(String(catInfo.price).replace(/[^0-9.]/g, '')) : 199, previousPrice: catInfo?.previousPrice ? parseFloat(String(catInfo.previousPrice).replace(/[^0-9.]/g, '')) : 398, lastUpdate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), sampleList, countryCode: country.toUpperCase(), mergedData: true };
+                        const mergedDataset = { 
+                            id: `merged-${country}-${category}`, 
+                            category: categoryDisplayName, 
+                            location: locationName, 
+                            totalRecords, 
+                            emailCount: catInfo?.emails !== undefined ? catInfo.emails : (hasEmail ? totalRecords : 0), 
+                            totalEmails: catInfo?.emails !== undefined ? catInfo.emails : (hasEmail ? totalRecords : 0), 
+                            phones: catInfo?.phones !== undefined ? catInfo.phones : (hasPhone ? totalRecords : 0), 
+                            totalPhones: catInfo?.phones !== undefined ? catInfo.phones : (hasPhone ? totalRecords : 0), 
+                            websiteCount: catInfo?.websites !== undefined ? catInfo.websites : (hasWebsite ? Math.floor(totalRecords * 0.7) : 0), 
+                            totalWebsites: catInfo?.websites !== undefined ? catInfo.websites : (hasWebsite ? Math.floor(totalRecords * 0.7) : 0), 
+                            linkedinCount: catInfo?.linkedin !== undefined ? catInfo.linkedin : (hasLinkedin ? Math.floor(totalRecords * 0.4) : 0), 
+                            totalLinkedin: catInfo?.linkedin !== undefined ? catInfo.linkedin : (hasLinkedin ? Math.floor(totalRecords * 0.4) : 0), 
+                            facebookCount: catInfo?.facebook !== undefined ? catInfo.facebook : (hasFacebook ? Math.floor(totalRecords * 0.5) : 0), 
+                            totalFacebook: catInfo?.facebook !== undefined ? catInfo.facebook : (hasFacebook ? Math.floor(totalRecords * 0.5) : 0), 
+                            instagramCount: catInfo?.instagram !== undefined ? catInfo.instagram : (hasInstagram ? Math.floor(totalRecords * 0.35) : 0), 
+                            totalInstagram: catInfo?.instagram !== undefined ? catInfo.instagram : (hasInstagram ? Math.floor(totalRecords * 0.35) : 0), 
+                            twitterCount: catInfo?.twitter !== undefined ? catInfo.twitter : (hasTwitter ? Math.floor(totalRecords * 0.2) : 0), 
+                            totalTwitter: catInfo?.twitter !== undefined ? catInfo.twitter : (hasTwitter ? Math.floor(totalRecords * 0.2) : 0), 
+                            tiktokCount: catInfo?.tiktok !== undefined ? catInfo.tiktok : (hasTiktok ? Math.floor(totalRecords * 0.15) : 0), 
+                            totalTiktok: catInfo?.tiktok !== undefined ? catInfo.tiktok : (hasTiktok ? Math.floor(totalRecords * 0.15) : 0), 
+                            youtubeCount: catInfo?.youtube !== undefined ? catInfo.youtube : (hasYoutube ? Math.floor(totalRecords * 0.25) : 0), 
+                            totalYoutube: catInfo?.youtube !== undefined ? catInfo.youtube : (hasYoutube ? Math.floor(totalRecords * 0.25) : 0), 
+                            price: catInfo?.price ? parseFloat(String(catInfo.price).replace(/[^0-9.]/g, '')) : 199, 
+                            previousPrice: catInfo?.previousPrice ? parseFloat(String(catInfo.previousPrice).replace(/[^0-9.]/g, '')) : 398, 
+                            lastUpdate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), 
+                            sampleList, 
+                            countryCode: country.toUpperCase(), 
+                            mergedData: true 
+                        };
                         setDataset(enrichWithMapData(mergedDataset)); setLoading(false); return;
                     } catch (e) { console.warn("Merged data fetch failed:", e); }
                 }
