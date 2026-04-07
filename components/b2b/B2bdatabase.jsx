@@ -245,7 +245,26 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
             if (city) displayLoc = `${city}, ${state}, ${country}`;
             const mappedData = cats.map((cat, idx) => {
                 const records = cat.records || 0;
-                return { id: `merged-${countryCode}-${cat.name}-${idx}`, name: `List Of ${cat.displayName} in ${displayLoc}`, records: records > 0 ? records.toLocaleString() : '—', emails: cat.hasEmail ? records.toLocaleString() : '0', phones: cat.hasPhone ? records.toLocaleString() : '0', full_address: `Last Updated: ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`, price: cat.price ? `$${cat.price}` : '$199', isDataset: true, displayLoc, category: cat.displayName, categorySlug: cat.name, countryCode, countryName: country, stateName: state || '', cityName: city || '' };
+                const emailCount = cat.emails !== undefined ? cat.emails : (cat.hasEmail ? records : 0);
+                const phoneCount = cat.phones !== undefined ? cat.phones : (cat.hasPhone ? records : 0);
+                
+                return { 
+                    id: `merged-${countryCode}-${cat.name}-${idx}`, 
+                    name: `List Of ${cat.displayName} in ${displayLoc}`, 
+                    records: records > 0 ? records.toLocaleString() : '—', 
+                    emails: emailCount > 0 ? emailCount.toLocaleString() : '0', 
+                    phones: phoneCount > 0 ? phoneCount.toLocaleString() : '0', 
+                    full_address: `Last Updated: ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`, 
+                    price: cat.price ? `$${cat.price}` : '$199', 
+                    isDataset: true, 
+                    displayLoc, 
+                    category: cat.displayName, 
+                    categorySlug: cat.name, 
+                    countryCode, 
+                    countryName: country, 
+                    stateName: state || '', 
+                    cityName: city || '' 
+                };
             });
             setDatasets(mappedData);
         } catch (error) { console.error("Error searching data:", error); setDatasets([]); }
