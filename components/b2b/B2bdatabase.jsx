@@ -81,7 +81,9 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
         setPurchaseLoading(true);
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-            await fetch(`${API_URL}/api/forms/submit`, {
+
+            // 1. Submit tracking form (fire-and-forget)
+            fetch(`${API_URL}/api/forms/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -95,43 +97,35 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                     },
                     source: window.location.hostname,
                 })
-            });
-        } catch (error) { console.error("Error submitting sample request:", error); }
-        
-        setTimeout(async () => {
-            const XLSX = await import('xlsx');
-            const wb = XLSX.utils.book_new();
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-            let dataUrl = `${API_URL}/api/merged/data?country=${selectedDatasetForSample?.countryCode || 'US'}&category=${selectedDatasetForSample?.categorySlug || 'business'}&page=1&limit=5`;
-            if (selectedDatasetForSample?.stateName) dataUrl += `&state=${encodeURIComponent(selectedDatasetForSample.stateName)}`;
-            if (selectedDatasetForSample?.cityName) dataUrl += `&city=${encodeURIComponent(selectedDatasetForSample.cityName)}`;
-            let rows = [];
-            try {
-                const res = await fetch(dataUrl);
-                const dataResult = await res.json();
-                if (dataResult.success) { rows = dataResult.data?.data || dataResult.data?.rows || []; }
-            } catch (e) { console.error("Failed to fetch real sample data: ", e); }
-            const getCol = (cols, pattern) => cols.find(c => pattern.test(c));
-            const exportData = (rows.length > 0 ? rows : Array(5).fill(null)).map((row, i) => {
-                if (!row) {
-                    return { "Business Name": `${selectedDatasetForSample?.category || "Business"} ${i + 1}`, "Address": "Available in Full List", "City": selectedDatasetForSample?.displayLoc?.split(',')[0] || "City", "State": "State", "Country": "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": "--", "Rating": (4 + Math.random()).toFixed(1), "Reviews": Math.floor(Math.random() * 500) };
-                }
-                const cols = Object.keys(row);
-                const nameCol = getCol(cols, /^(name|business|company|title)/i) || cols[0];
-                const cityCol = getCol(cols, /^city/i); const stateCol = getCol(cols, /^(state|province|region)/i);
-                const countryCol = getCol(cols, /^country/i); const websiteCol = getCol(cols, /^(website|url)/i);
-                const ratingCol = getCol(cols, /^(rating|stars)/i); const reviewCol = getCol(cols, /^(review|total.?review)/i);
-                return { "Business Name": row[nameCol] || `${selectedDatasetForSample?.category || "Business"} ${i + 1}`, "Address": "Available in Full List", "City": cityCol ? row[cityCol] : (selectedDatasetForSample?.displayLoc?.split(",")[0] || "City"), "State": stateCol ? row[stateCol] : "State", "Country": countryCol ? row[countryCol] : "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": websiteCol && row[websiteCol] ? row[websiteCol] : "--", "Rating": ratingCol ? row[ratingCol] : (4 + Math.random()).toFixed(1), "Reviews": reviewCol ? row[reviewCol] : Math.floor(Math.random() * 500) };
-            });
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wscols = [{wch: 30}, {wch: 30}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 20}, {wch: 10}, {wch: 10}];
-            ws['!cols'] = wscols;
-            XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
-            XLSX.writeFile(wb, `${selectedDatasetForSample?.name?.replace(/ /g, '_') || 'Sample'}_Leads.xlsx`);
+            }).catch(error => { console.error("Error submitting sample request:", error); });
+
+            // 2. Download sample CSV from backend (unmasked if manual sample exists)
+            const countryCode = selectedDatasetForSample?.countryCode || 'US';
+            const categorySlug = selectedDatasetForSample?.categorySlug || 'business';
+            const downloadUrl = `${API_URL}/api/merged/download-sample?country=${countryCode}&category=${encodeURIComponent(categorySlug)}`;
+            
+            const response = await fetch(downloadUrl);
+            if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+
+            // 3. Trigger browser download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${selectedDatasetForSample?.name?.replace(/ /g, '_') || 'Sample'}_Leads.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
             setPurchaseLoading(false);
             setIsSampleModalOpen(false);
             alert("Sample data downloaded successfully!");
-        }, 1500);
+        } catch (error) {
+            console.error("Error downloading sample:", error);
+            setPurchaseLoading(false);
+            alert("Failed to download sample data. Please try again.");
+        }
     };
 
     const fetchCountries = async () => {

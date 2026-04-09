@@ -74,22 +74,31 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
         if (!sampleForm.fullName.trim() || !sampleForm.email.trim() || !isPhoneValid) { alert("Please fill in all required fields (Name, Email, and a valid Phone number)."); return; }
         setPurchaseLoading(true);
         try {
-            const XLSX = await import('xlsx');
             const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-            await fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sample_request', name: sampleForm.fullName, email: sampleForm.email, phone: sampleForm.phoneNumber, datasetDetails: { id: dataset.id, category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, source: window.location.hostname }) }).catch(error => { console.error("Error submitting sample request API:", error); });
-            setTimeout(() => {
-                try {
-                    const wb = XLSX.utils.book_new();
-                    const exportData = dataset.sampleList.map(item => ({ "Business Name": item.name, "Address": item.address || "Available in Full List", "City": item.city, "State": item.state, "Country": item.country, "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": item.website || "--", "Rating": item.rating, "Reviews": item.reviews }));
-                    const ws = XLSX.utils.json_to_sheet(exportData);
-                    const wscols = [{wch: 30}, {wch: 30}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 20}, {wch: 10}, {wch: 10}];
-                    ws['!cols'] = wscols;
-                    XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
-                    XLSX.writeFile(wb, `${dataset.category}-${dataset.location}-SAMPLE.xlsx`);
-                    setPurchaseLoading(false); setIsSampleModalOpen(false); alert("Sample data downloaded successfully!");
-                } catch (error) { console.error("Error generating sample file:", error); setPurchaseLoading(false); alert("Failed to create sample file."); }
-            }, 1500);
-        } catch (error) { console.error("Error preparing sample request:", error); setPurchaseLoading(false); alert("Failed to prepare sample download."); }
+
+            // 1. Submit tracking form (fire-and-forget)
+            fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sample_request', name: sampleForm.fullName, email: sampleForm.email, phone: sampleForm.phoneNumber, datasetDetails: { id: dataset.id, category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, source: window.location.hostname }) }).catch(error => { console.error("Error submitting sample request API:", error); });
+
+            // 2. Download sample CSV from backend (unmasked if manual sample exists)
+            const categorySlug = category ? category.replace(/-/g, '_') : (dataset.category || '').replace(/\s+/g, '_');
+            const downloadUrl = `${API_URL}/api/merged/download-sample?country=${countryApiCode}&category=${encodeURIComponent(categorySlug)}`;
+            
+            const response = await fetch(downloadUrl);
+            if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+
+            // 3. Trigger browser download from response blob
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${dataset.category}-${dataset.location}-SAMPLE.csv`.replace(/\s+/g, '_');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            setPurchaseLoading(false); setIsSampleModalOpen(false); alert("Sample data downloaded successfully!");
+        } catch (error) { console.error("Error downloading sample:", error); setPurchaseLoading(false); alert("Failed to download sample data. Please try again."); }
     };
 
     const processDownloadAfterPayment = async () => {
