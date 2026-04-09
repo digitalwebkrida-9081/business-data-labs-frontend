@@ -99,24 +99,41 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                 })
             }).catch(error => { console.error("Error submitting sample request:", error); });
 
-            // 2. Download sample CSV from backend (unmasked if manual sample exists)
+            // 2. Try backend download-sample (serves unmasked manual samples)
             const countryCode = selectedDatasetForSample?.countryCode || 'US';
             const categorySlug = selectedDatasetForSample?.categorySlug || 'business';
             const downloadUrl = `${API_URL}/api/merged/download-sample?country=${countryCode}&category=${encodeURIComponent(categorySlug)}`;
             
             const response = await fetch(downloadUrl);
-            if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
-
-            // 3. Trigger browser download
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${selectedDatasetForSample?.name?.replace(/ /g, '_') || 'Sample'}_Leads.csv`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${selectedDatasetForSample?.name?.replace(/ /g, '_') || 'Sample'}_Leads.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                // Fallback: Generate masked Excel from /api/merged/data
+                const XLSX = await import('xlsx');
+                let dataUrl = `${API_URL}/api/merged/data?country=${countryCode}&category=${encodeURIComponent(categorySlug)}&page=1&limit=5`;
+                if (selectedDatasetForSample?.stateName) dataUrl += `&state=${encodeURIComponent(selectedDatasetForSample.stateName)}`;
+                if (selectedDatasetForSample?.cityName) dataUrl += `&city=${encodeURIComponent(selectedDatasetForSample.cityName)}`;
+                let rows = [];
+                try { const dataRes = await fetch(dataUrl); const dataResult = await dataRes.json(); if (dataResult.success) rows = dataResult.data?.data || dataResult.data?.rows || []; } catch (e) { console.error("Fallback fetch failed:", e); }
+                const getCol = (cols, pattern) => cols.find(c => pattern.test(c));
+                const exportData = (rows.length > 0 ? rows : Array(5).fill(null)).map((row, i) => {
+                    if (!row) return { "Business Name": `${selectedDatasetForSample?.category || "Business"} ${i + 1}`, "Address": "Available in Full List", "City": selectedDatasetForSample?.displayLoc?.split(',')[0] || "City", "State": "State", "Country": "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": "--", "Rating": (4 + Math.random()).toFixed(1), "Reviews": Math.floor(Math.random() * 500) };
+                    const cols = Object.keys(row); const nameCol = getCol(cols, /^(name|business|company|title)/i) || cols[0];
+                    return { "Business Name": row[nameCol] || `Business ${i+1}`, "Address": "Available in Full List", "City": row[getCol(cols, /^city/i)] || "City", "State": row[getCol(cols, /^(state|province)/i)] || "State", "Country": row[getCol(cols, /^country/i)] || "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": row[getCol(cols, /^(website|url)/i)] || "--", "Rating": row[getCol(cols, /^(rating|stars)/i)] || (4+Math.random()).toFixed(1), "Reviews": row[getCol(cols, /^(review)/i)] || Math.floor(Math.random()*500) };
+                });
+                const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet(exportData);
+                ws['!cols'] = [{wch:30},{wch:30},{wch:15},{wch:15},{wch:15},{wch:25},{wch:25},{wch:20},{wch:10},{wch:10}];
+                XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
+                XLSX.writeFile(wb, `${selectedDatasetForSample?.name?.replace(/ /g, '_') || 'Sample'}_Leads.xlsx`);
+            }
 
             setPurchaseLoading(false);
             setIsSampleModalOpen(false);

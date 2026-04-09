@@ -79,23 +79,40 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
             // 1. Submit tracking form (fire-and-forget)
             fetch(`${API_URL}/api/forms/submit`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'sample_request', name: sampleForm.fullName, email: sampleForm.email, phone: sampleForm.phoneNumber, datasetDetails: { id: dataset.id, category: dataset.category, location: dataset.location, country: country, state: filterState, city: filterCity }, source: window.location.hostname }) }).catch(error => { console.error("Error submitting sample request API:", error); });
 
-            // 2. Download sample CSV from backend (unmasked if manual sample exists)
+            // 2. Try backend download-sample (serves unmasked manual samples)
             const categorySlug = category ? category.replace(/-/g, '_') : (dataset.category || '').replace(/\s+/g, '_');
             const downloadUrl = `${API_URL}/api/merged/download-sample?country=${countryApiCode}&category=${encodeURIComponent(categorySlug)}`;
             
             const response = await fetch(downloadUrl);
-            if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
-
-            // 3. Trigger browser download from response blob
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${dataset.category}-${dataset.location}-SAMPLE.csv`.replace(/\s+/g, '_');
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${dataset.category}-${dataset.location}-SAMPLE.csv`.replace(/\s+/g, '_');
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } else {
+                // Fallback: Generate masked Excel from /api/merged/data
+                const XLSX = await import('xlsx');
+                let dataUrl = `${API_URL}/api/merged/data?country=${countryApiCode}&category=${encodeURIComponent(categorySlug)}&page=1&limit=5`;
+                if (filterState) dataUrl += `&state=${encodeURIComponent(filterState)}`;
+                if (filterCity) dataUrl += `&city=${encodeURIComponent(filterCity)}`;
+                let rows = [];
+                try { const dataRes = await fetch(dataUrl); const dataResult = await dataRes.json(); if (dataResult.success) rows = dataResult.data?.data || dataResult.data?.rows || []; } catch (e) { console.error("Fallback fetch failed:", e); }
+                const getCol = (cols, pattern) => cols.find(c => pattern.test(c));
+                const exportData = (rows.length > 0 ? rows : Array(5).fill(null)).map((row, i) => {
+                    if (!row) return { "Business Name": `${dataset.category || "Business"} ${i + 1}`, "Address": "Available in Full List", "City": dataset.location || "City", "State": "State", "Country": country || "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": "--", "Rating": (4 + Math.random()).toFixed(1), "Reviews": Math.floor(Math.random() * 500) };
+                    const cols = Object.keys(row); const nameCol = getCol(cols, /^(name|business|company|title)/i) || cols[0];
+                    return { "Business Name": row[nameCol] || `Business ${i+1}`, "Address": "Available in Full List", "City": row[getCol(cols, /^city/i)] || "City", "State": row[getCol(cols, /^(state|province)/i)] || "State", "Country": row[getCol(cols, /^country/i)] || "Country", "Phone": "Available in Full List (Verified)", "Email": "Available in Full List (Verified)", "Website": row[getCol(cols, /^(website|url)/i)] || "--", "Rating": row[getCol(cols, /^(rating|stars)/i)] || (4+Math.random()).toFixed(1), "Reviews": row[getCol(cols, /^(review)/i)] || Math.floor(Math.random()*500) };
+                });
+                const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet(exportData);
+                ws['!cols'] = [{wch:30},{wch:30},{wch:15},{wch:15},{wch:15},{wch:25},{wch:25},{wch:20},{wch:10},{wch:10}];
+                XLSX.utils.book_append_sheet(wb, ws, "Sample Leads");
+                XLSX.writeFile(wb, `${dataset.category}-${dataset.location}-SAMPLE.xlsx`.replace(/\s+/g, '_'));
+            }
 
             setPurchaseLoading(false); setIsSampleModalOpen(false); alert("Sample data downloaded successfully!");
         } catch (error) { console.error("Error downloading sample:", error); setPurchaseLoading(false); alert("Failed to download sample data. Please try again."); }
