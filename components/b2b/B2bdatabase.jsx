@@ -187,7 +187,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                 if (!countryObj?.code) return;
                 try {
                     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-                    const res = await fetch(`${API_URL}/api/merged/categories?country=${countryObj.code}&limit=10000`);
+                    const res = await fetch(`${API_URL}/api/merged/categories?country=${countryObj.code}&limit=10000&domain=${window.location.hostname}`);
                     const result = await res.json();
                     if (result.success && result.data?.categories) {
                         setMergedCats(result.data.categories);
@@ -230,7 +230,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
             if (!countryCode) { setDatasets([]); setLoading(false); return; }
             let cats = []; let paginationData = null;
             if (state || city || category) {
-                let url = `${API_URL}/api/merged/categories-count?country=${countryCode}`;
+                let url = `${API_URL}/api/merged/categories-count?country=${countryCode}&domain=${window.location.hostname}`;
                 if (state) url += `&state=${encodeURIComponent(state)}`;
                 if (city) url += `&city=${encodeURIComponent(city)}`;
                 if (category) { const catObj = categories.find(c => c.name === category); const categorySlug = catObj ? (catObj._id || category) : category; url += `&category=${encodeURIComponent(categorySlug)}`; }
@@ -241,7 +241,7 @@ const B2bdatabase = ({ isSeoPage = false, initialFilters = {} }) => {
                     if (countResult.data.pagination && !category) { paginationData = countResult.data.pagination; }
                 }
             } else {
-                let url = `${API_URL}/api/merged/categories?country=${countryCode}`;
+                let url = `${API_URL}/api/merged/categories?country=${countryCode}&domain=${window.location.hostname}`;
                 url += `&page=${currentPage}&limit=${ITEMS_PER_PAGE}`;
                 const catRes = await fetch(url); const catResult = await catRes.json();
                 if (catResult.success && catResult.data?.categories) {

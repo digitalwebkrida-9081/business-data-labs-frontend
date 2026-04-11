@@ -158,12 +158,12 @@ const B2bDatasetDetail = ({ id, country, category, initialDataset = null }) => {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
                 if (country && category) {
                     try {
-                        let dataUrl = `${API_URL}/api/merged/data?country=${countryApiCode}&category=${category.replace(/-/g, '_')}&page=1&limit=10`;
+                        let dataUrl = `${API_URL}/api/merged/data?country=${countryApiCode}&category=${category.replace(/-/g, '_')}&page=1&limit=10&domain=${window.location.hostname}`;
                         if (filterState) dataUrl += `&state=${encodeURIComponent(filterState)}`;
                         if (filterCity) dataUrl += `&city=${encodeURIComponent(filterCity)}`;
                         const [dataRes, catRes] = await Promise.all([
                             fetch(dataUrl),
-                            fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=10000`)
+                            fetch(`${API_URL}/api/merged/categories?country=${countryApiCode}&limit=10000&domain=${window.location.hostname}`)
                         ]);
                         const dataResult = await dataRes.json(); const catResult = await catRes.json();
                         const catInfo = catResult.success && catResult.data?.categories ? catResult.data.categories.find(c => c.name === category || c.name === category.replace(/-/g, '_')) : null;
